@@ -4,8 +4,21 @@ export const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
+  const handleLogin = async() => {
     // Add your login logic here, e.g., making an API request to authenticate the user.
+    let result = await fetch('http://localhost:3000/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type ':  'application/json'
+      },
+      body: JSON.stringify({
+        email,
+        password
+      })
+    })
+    
+      result = await result.json();
+    
   };
 
   return (

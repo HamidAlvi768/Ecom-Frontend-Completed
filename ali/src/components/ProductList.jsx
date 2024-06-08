@@ -1,44 +1,87 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
+import { useProductsContext } from "../hooks/useProductsContext";
 export const ProductList = () => {
-    const [products, setProducts] = useState([]);
   const [error, setError] = useState(null);
-    useEffect(() => {
-        // Define the backend API URL
-        const apiUrl = 'http://localhost:5000/products';
-    
-        // Fetch products from the backend
-        const fetchProducts = async () => {
-          try {
-            const response = await fetch(apiUrl);
-            if (!response.ok) {
-              throw new Error('Network response was not ok');
-            }
-    
-            const data = await response.json();
-            setProducts(data);
-          } catch (err) {
-            setError(err.message);
-          }
-        };
-    
-        fetchProducts();
-      }, []);
+
+  const { products, dispatch } = useProductsContext();
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const apiUrl = "http://localhost:5000/api/products";
+
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/products");
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const data = await response.json();
+      if (response.ok) {
+        dispatch({ type: "SET_PRODUCTS", payload: data });
+      }
+    } catch (err) {
+      dispatch({ type: "ERROR", payload: err.message });
+    }
+  };
+
+  const deleteProduct = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/products/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const data = await response.json();
+      dispatch({ type: "DELETE_PRODUCT", payload: id });
+    } catch (err) {
+      dispatch({ type: "ERROR", payload: err.message });
+    }
+  };
   return (
-    <div>
+    <div className="product-details">
       <div>
         <input type="text" placeholder="Search for products" />
         <button>Search</button>
       </div>
-        {error && <p>Error: {error}</p>}
+      {error && <p>Error: {error}</p>}
       <h1>Product List</h1>
-      <ul>
-        {products.map((product) => (
-          <li key={product._id}>
-            {product.name}, {product.price}, {product.category}, {product.company}
-          </li>
-        ))}
-      </ul>
+      <table className="product-table">
+        <tbody>
+          <tr>
+            <th className="product-label">Image</th>
+            <th className="product-label">Name</th>
+            <th className="product-label">Price</th>
+            <th className="product-label">Category</th>
+            <th className="product-label">Company</th>
+          </tr>
+          {products &&
+            products.map((product) => (
+              <tr key={product._id}>
+                <td>
+                  <img
+                    className="product-image"
+                    src={`http://localhost:5000${product.image}`}
+                    alt={product.name}
+                  />
+                </td>
+                <td>{product.name}</td>
+                <td>{product.price}</td>
+                <td>{product.category}</td>
+                <td>{product.company}</td>
+                <td
+                  className="x-button"
+                  onClick={() => deleteProduct(product._id)}
+                >
+                  Delete
+                </td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
     </div>
   );
 };
-

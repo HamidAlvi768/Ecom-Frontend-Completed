@@ -8,10 +8,12 @@ import {ProductList} from './components/ProductList';
 import {UpdateProduct} from './components/UpdateProduct';
 import {Login} from './components/Login';
 import {Signup} from './components/Signup';
+import { ProductsContextProvider } from './context/ProductsContext';
 
 
 function App() {
   return (
+    <ProductsContextProvider>
     <Router>
       <div className="App">
         <Navbar />
@@ -24,6 +26,7 @@ function App() {
         </Routes>
       </div>
     </Router>
+    </ProductsContextProvider>
   );
 }
 

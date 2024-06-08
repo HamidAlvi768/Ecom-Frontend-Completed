@@ -1,27 +1,75 @@
-import React, { useState } from "react";
-
+import React, { useState } from 'react';
+import { useProductsContext } from '../hooks/useProductsContext';
 export const Home = () => {
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState(""); // Changed state variable name
-  const [category, setCategory] = useState(""); // Changed state variable name
-  const [company, setCompany] = useState(""); // Changed state variable name
+    const [file, setFile] = useState(null);
+    const [filename, setFilename] = useState('Choose File');
+    const [uploadedFilePath, setUploadedFilePath] = useState('');
+    const [name, setName] = useState("");
+    const [price, setPrice] = useState(""); // Changed state variable name
+    const [category, setCategory] = useState(""); // Changed state variable name
+    const [company, setCompany] = useState(""); // Changed state variable name
+    const [image, setImage] = useState("");
+    const { dispatch } = useProductsContext();
 
-  const addProduct = async () => {
-    let result = await fetch("http://localhost:5000/add-products", {
-      method: "POST",
-      body: JSON.stringify({ name, price, category, company }), // Updated state variable names
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    result = await result.json();
-  };
+    const onChange = e => {
+        setFile(e.target.files[0]);
+        setFilename(e.target.files[0].name);
+    };
 
-  return (
-    <div className="home">
-      <h1>Welcome to the Home Page</h1>
-      <form onSubmit={addProduct}>
-        <input
+    const onSubmit = async e => {
+        // e.preventDefault();
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const res = await fetch('http://localhost:5000/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            setUploadedFilePath(data.filePath);
+            dispatch({ type: "CREATE_PRODUCT", payload: data });
+            console.log('File uploaded successfully:', data);
+        } catch (err) {
+            console.error('Error uploading file:', err);
+        }
+    };
+
+    const onAddProduct = async e => {
+        e.preventDefault();
+        // const product = {
+        //     name: e.target.name.value,
+        //     price: e.target.price.value,
+        //     image: uploadedFilePath
+        // };
+
+        try {
+            const res = await fetch('http://localhost:5000/api/products', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, price, category, company, image:uploadedFilePath }),
+            });
+            const data = await res.json();
+            console.log('Product added successfully:', data);
+        } catch (err) {
+            console.error('Error adding product:', err);
+        }
+    };
+
+    return (
+        <div>
+            <form onSubmit={onSubmit}>
+                <div>
+                    <input type="file" onChange={onChange} />
+                    <label>{filename}</label>
+                </div>
+                <input type="submit" value="Upload" />
+            </form>
+            {uploadedFilePath && (
+                <form onSubmit={onAddProduct}>
+                  <input
           type="text"
           placeholder="Product Name"
           value={name}
@@ -45,9 +93,10 @@ export const Home = () => {
           value={company}
           onChange={(e) => setCompany(e.target.value)} // Updated state variable name
         />
-        <button type="submit">Add</button>
-      </form>
-    </div>
-  );
+                    <input type="submit" value="Add Product" />
+                </form>
+            )}
+        </div>
+    );
 };
 

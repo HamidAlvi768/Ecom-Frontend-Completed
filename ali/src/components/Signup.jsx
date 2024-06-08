@@ -5,8 +5,20 @@ export const Signup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSignup = () => {
+  const handleSignup = async() => {
     // Add your signup logic here, e.g., making an API request to create a new user.
+    let result = await fetch('http://localhost:5000/api/users/signup', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name,
+        email,
+        password
+      }),
+      })
+    result = await result.json()
   };
 
   return (
