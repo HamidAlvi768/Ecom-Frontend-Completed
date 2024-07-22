@@ -1,102 +1,109 @@
-import React, { useState } from 'react';
-import { useProductsContext } from '../hooks/useProductsContext';
+import React, { useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faTag,
+  faDollarSign,
+  faList,
+  faBuilding,
+} from "@fortawesome/free-solid-svg-icons";
+import { useProductsContext } from "../hooks/useProductsContext";
+import { FaImage } from "react-icons/fa6";
+
 export const Home = () => {
-    const [file, setFile] = useState(null);
-    const [filename, setFilename] = useState('Choose File');
-    const [uploadedFilePath, setUploadedFilePath] = useState('');
-    const [name, setName] = useState("");
-    const [price, setPrice] = useState(""); // Changed state variable name
-    const [category, setCategory] = useState(""); // Changed state variable name
-    const [company, setCompany] = useState(""); // Changed state variable name
-    const [image, setImage] = useState("");
-    const { dispatch } = useProductsContext();
+  const [formData, setFormData] = useState({
+    name: "",
+    category: "",
+    company: "",
+    price: "",
+    image: "",
+  });
+  const { dispatch } = useProductsContext();
 
-    const onChange = e => {
-        setFile(e.target.files[0]);
-        setFilename(e.target.files[0].name);
-    };
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-    const onSubmit = async e => {
-        // e.preventDefault();
-        const formData = new FormData();
-        formData.append('file', file);
+  const handleImageChange = (e) => {
+    setFormData({ ...formData, image: e.target.files[0] });
+  };
 
-        try {
-            const res = await fetch('http://localhost:5000/upload', {
-                method: 'POST',
-                body: formData
-            });
-            const data = await res.json();
-            setUploadedFilePath(data.filePath);
-            dispatch({ type: "CREATE_PRODUCT", payload: data });
-            console.log('File uploaded successfully:', data);
-        } catch (err) {
-            console.error('Error uploading file:', err);
-        }
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const data = new FormData();
+    data.append("name", formData.name);
+    data.append("category", formData.category);
+    data.append("price", formData.price);
+    data.append("company", formData.company);
+    data.append("image", formData.image);
 
-    const onAddProduct = async e => {
-        e.preventDefault();
-        // const product = {
-        //     name: e.target.name.value,
-        //     price: e.target.price.value,
-        //     image: uploadedFilePath
-        // };
+    const response = await fetch("http://localhost:5000/api/products/add", {
+      method: "POST",
+      body: data,
+    });
 
-        try {
-            const res = await fetch('http://localhost:5000/api/products', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ name, price, category, company, image:uploadedFilePath }),
-            });
-            const data = await res.json();
-            console.log('Product added successfully:', data);
-        } catch (err) {
-            console.error('Error adding product:', err);
-        }
-    };
+    if (response.ok) {
+      setFormData({
+        name: "",
+        category: "",
+        company: "",
+        price: "",
+        image: "",
+      });
+      alert("Product added successfully!");
+    }
+  };
 
-    return (
-        <div>
-            <form onSubmit={onSubmit}>
-                <div>
-                    <input type="file" onChange={onChange} />
-                    <label>{filename}</label>
-                </div>
-                <input type="submit" value="Upload" />
-            </form>
-            {uploadedFilePath && (
-                <form onSubmit={onAddProduct}>
-                  <input
-          type="text"
-          placeholder="Product Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <input
-          type="number"
-          placeholder="Product Price"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)} // Updated state variable name
-        />
-        <input
-          type="text"
-          placeholder="Product Category"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)} // Updated state variable name
-        />
-        <input
-          type="text"
-          placeholder="Product Company"
-          value={company}
-          onChange={(e) => setCompany(e.target.value)} // Updated state variable name
-        />
-                    <input type="submit" value="Add Product" />
-                </form>
-            )}
+  return (
+    <div className="add-product">
+      <h2>Add Product</h2>
+      <div className="container">
+        <div className="flex items-center justify-center w-full">
+          {" "}
+          <label htmlFor="image-upload" className="file-upload-label">
+            {" "}
+            <div className="file-upload-content">
+              {" "}
+              <FaImage className="upload-icon" />{" "}
+            </div>{" "}
+            <input id="image-upload" type="file" className="hidden" />{" "}
+          </label>{" "}
         </div>
-    );
-};
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            name="name"
+            placeholder="Product Name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+          />
+          <input
+            type="text"
+            name="category"
+            placeholder="Product Category"
+            value={formData.category}
+            onChange={handleChange}
+            required
+          />
+          <input
+            name="company"
+            placeholder="Product company"
+            value={formData.company}
+            onChange={handleChange}
+            required
+          />
+          <input
+            type="number"
+            name="price"
+            placeholder="Product Price"
+            value={formData.price}
+            onChange={handleChange}
+            required
+          />
 
+          <button type="submit">Add Product</button>
+        </form>
+      </div>
+    </div>
+  );
+};
