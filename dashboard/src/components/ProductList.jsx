@@ -16,16 +16,17 @@ export const ProductList = () => {
 
   return (
     <div className="product-list">
-      <h1>Product List</h1>
+      <h1 className="page-heading">Product List</h1>
+      <div className="table-container">
       <table className="product-table">
         <thead>
           <tr>
+            <th>Image</th>
             <th>Name</th>
             <th>Category</th>
             <th>Company</th>
             <th>Price</th>
-            <th>Image</th>
-            <th>Actions</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
@@ -44,12 +45,13 @@ export const ProductList = () => {
               <td>${product.price}</td>
 
               <td>
-                <Link to={`/update/${product._id}`}>Update</Link>
+                <Link to={`/update-product/${product._id}`}>Update</Link>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 };

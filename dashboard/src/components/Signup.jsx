@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export const Signup = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [user, setUser] = useState('')
+  const navigate = useNavigate();
 
-  const handleSignup = async() => {
+  const handleSignup = async (e) => {
+    e.preventDefault();
     // Add your signup logic here, e.g., making an API request to create a new user.
     let result = await fetch('http://localhost:5000/api/users/signup', {
       method: 'POST',
@@ -16,42 +20,64 @@ export const Signup = () => {
         name,
         email,
         password
-      }),
       })
-    result = await result.json()
+    });
+    
+    result = await result.json();
+
+    if (result) {
+      // Set user data only if successful signup
+      setUser(result);
+      localStorage.setItem("user", JSON.stringify(result));
+      navigate('/');
+    }
+    // Handle the result here (e.g., store token, redirect user, show error)
   };
 
   return (
-    <div>
-      <h1>Signup</h1>
-      <form>
-        <div>
-          <label>Name:</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
+    <div className="Signup">
+      <section>
+        <div className="signup">
+          <div className="content">
+            <h2>Sign Up</h2>
+            <form className="form" onSubmit={handleSignup}>
+              <div className="inputBox">
+                <input
+                  type="text"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+                <i>Name</i>
+              </div>
+              <div className="inputBox">
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <i>Email</i>
+              </div>
+              <div className="inputBox">
+                <input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <i>Password</i>
+              </div>
+              <div className="links">
+                <a href="#">Already have an account? Login</a>
+              </div>
+              <div className="inputBox">
+                <input type="submit" value="Sign Up" />
+              </div>
+            </form>
+          </div>
         </div>
-        <div>
-          <label>Email:</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
-        <div>
-          <label>Password:</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        <button onClick={handleSignup}>Signup</button>
-      </form>
+      </section>
     </div>
   );
 };
-
