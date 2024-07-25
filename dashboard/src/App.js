@@ -1,7 +1,7 @@
 import React from 'react';
 import "./App.css"
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-
+import { PrivateComponent } from './components/PrivateComponent';
 import {Navbar} from './components/Navbar';
 import {Home} from './components/Home';
 import {ProductList} from './components/ProductList';
@@ -18,9 +18,11 @@ function App() {
       <div className="App">
         <Navbar />
         <Routes>
+              <Route element={<PrivateComponent />} >
           <Route path="/" element={<Home />} />
           <Route path="/product" element={<ProductList />} />
           <Route path="/update-product/:id" element={<UpdateProduct />} />
+            </Route>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
         </Routes>
