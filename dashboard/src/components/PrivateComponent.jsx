@@ -1,15 +1,3 @@
-<<<<<<< HEAD
-import React from 'react'
-import { Outlet, Navigate } from 'react-router-dom'
-import { Signup } from './Signup';
-
-export const PrivateComponent = () => {
- const auth = localStorage.getItem('user');
-
-  return auth? <Outlet />: <Navigate to='/signup' />
-  
-}
-=======
 import React, { useEffect, useState } from 'react'
 import { Outlet, Navigate } from 'react-router-dom'
 import { Signup } from './Signup';
@@ -47,4 +35,3 @@ export const PrivateComponent = () => {
 
   return auth ? <Outlet /> : <Navigate to='/signup' />
 }
->>>>>>> 3ab7f08 (Reusable)
