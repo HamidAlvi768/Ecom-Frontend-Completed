@@ -75,14 +75,13 @@ export const Dashboard = () => {
   };
 
   const revenueData = [
-    { name: 'Jan', invested: 2000, earnings: 2400, expenses: 2400 },
-    { name: 'Feb', invested: 3000, earnings: 1398, expenses: 2210 },
-    { name: 'Mar', invested: 2000, earnings: 9800, expenses: 2290 },
-    { name: 'Apr', invested: 2780, earnings: 3908, expenses: 2000 },
-    { name: 'May', invested: 1890, earnings: 4800, expenses: 2181 },
-    { name: 'Jun', invested: 2390, earnings: 3800, expenses: 2500 },
-    { name: 'Jul', invested: 3490, earnings: 4300, expenses: 2100 },
-  ];
+    { name: 'Jan', invested: 0, earnings: 0, expenses: 0 },
+    { name: 'Feb', invested: 0, earnings: 0, expenses: 0 },
+    { name: 'Mar', invested: 0, earnings: 0, expenses: 0 },
+    { name: 'Apr', invested: 0, earnings: 0, expenses: 0 },
+    { name: 'May', invested: 0, earnings: 0, expenses: 0 },
+    { name: 'Jun', invested: 0, earnings: 0, expenses: 0 },
+    { name: 'Jul', invested: 0, earnings: 0, expenses: 0 },  ];
 
   const orderOverviewData = orders.reduce((acc, order) => {
     const status = order.status || 'pending';

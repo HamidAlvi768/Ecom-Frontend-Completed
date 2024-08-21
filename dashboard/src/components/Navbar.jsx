@@ -23,7 +23,7 @@ export const Navbar = () => {
             <li>
               <Link to="/">Product Upload</Link>
             </li>
-            {/* <li><Link to="/profile">Profile</Link></li> */}
+            <li><Link to="/orders">Orders</Link></li>
             <li>
               <Link onClick={logout} to="/signup">
                 Logout

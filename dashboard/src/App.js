@@ -11,6 +11,8 @@ import {Login} from './components/Login';
 import {Signup} from './components/Signup';
 import { ProductsContextProvider } from './context/ProductsContext';
 import { PrivateComponent } from './components/PrivateComponent';
+import {MyOrder} from './components/Orders';
+// import OrdersTable from './components/Orders';
 
 
 function App() {
@@ -24,6 +26,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/product" element={<ProductList />} />
           <Route path="/update-product/:id" element={<UpdateProduct />} />
+          <Route path="/orders" element={<MyOrder />} />
           <Route path="/dashboard" element={<Dashboard />}/>
           </Route>
           <Route path="/login" element={<Login />} />
