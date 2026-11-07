@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { clearLogin } from "../config";
+import { ThemeToggle } from "./ThemeToggle";
 
 export const Navbar = () => {
   const auth = localStorage.getItem("token");
@@ -29,12 +30,14 @@ export const Navbar = () => {
               Logout
             </Link>
           </li>
+          <li><ThemeToggle /></li>
         </ul>
       ) : (
         <ul className="nav-ul nav-right">
           <li>
             <Link to="/login">Admin Login</Link>
           </li>
+          <li><ThemeToggle /></li>
         </ul>
       )}
     </nav>
