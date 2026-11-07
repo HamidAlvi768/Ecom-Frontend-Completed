@@ -1,15 +1,6 @@
-import { API_URL } from "../config";
+import { API_URL, apiFetch, assetUrl } from "../config";
 import React, { useState, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faTag,
-  faDollarSign,
-  faList,
-  faBuilding,
-} from "@fortawesome/free-solid-svg-icons";
-import { useProductsContext } from "../hooks/useProductsContext";
-import { FaImage } from "react-icons/fa6";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 export const UpdateProduct = () => {
   const [photo, setPhoto] = useState(null);
@@ -20,35 +11,16 @@ export const UpdateProduct = () => {
     price: "",
     image: "",
   });
-  const { dispatch } = useProductsContext();
   const { id } = useParams();
-
-  const fetchProductById = async (productId) => {
-    // Fetch logic here
-    // This is a placeholder. Replace with actual API call
-    const response = await fetch(
-      `${API_URL}/products/${id}`,
-      {
-        headers: {
-          authorization: `bearer ${JSON.parse(localStorage.getItem("token"))}`,
-        },
-      }
-    );
-    if (response.ok) {
-      const data = await response.json();
-      return data;
-    } else {
-      throw new Error("Failed to fetch product");
-    }
-  };
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch product data and set it to formData
     const fetchProductData = async () => {
       try {
-        const productId = id; // Use the id from useParams
-        const fetchedData = await fetchProductById(productId);
-        setFormData(fetchedData);
+        const response = await fetch(`${API_URL}/products/${id}`);
+        if (!response.ok) throw new Error("Failed to fetch product");
+        const { name, category, company, price, image } = await response.json();
+        setFormData({ name, category, company, price, image });
       } catch (error) {
         console.error("Error fetching product:", error);
       }
@@ -72,23 +44,21 @@ export const UpdateProduct = () => {
     e.preventDefault();
     const data = new FormData();
     Object.keys(formData).forEach((key) => {
+      // Only send the image when a new file was picked
+      if (key === "image" && !(formData.image instanceof File)) return;
       data.append(key, formData[key]);
     });
 
-    // Update logic here
-    const response = await fetch(
-      `${API_URL}/products/update/${id}`,
-      {
-        method: "PUT",
-        body: data,
-      }
-    );
-
+    const response = await apiFetch(`/products/update/${id}`, {
+      method: "PUT",
+      body: data,
+    });
+    const result = await response.json().catch(() => ({}));
     if (response.ok) {
       alert("Product updated successfully!");
-      // Optionally, you can reset the form here
-      // setFormData({ name: "", category: "", company: "", price: "", image: "" });
-      // setPhoto(null);
+      navigate("/product");
+    } else {
+      alert(result.message || "Could not update the product");
     }
   };
 
@@ -114,7 +84,7 @@ export const UpdateProduct = () => {
               ) : (
                 <img
                   className="upload-icon uploaded-image"
-                  src={formData.image}
+                  src={assetUrl(formData.image)}
                   alt=""
                 />
               )}

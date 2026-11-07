@@ -1,78 +1,45 @@
-import { API_URL } from "../config";
+import { apiFetch, ORDER_STATUSES, STATUS_COLORS, money } from "../config";
 import React, { useEffect, useState } from "react";
 import { Carousel } from 'react-responsive-carousel';
 
-export function MyOrder() {
-  const [orderData, setorderData] = useState({});
+const ORDERS_PER_SLIDE = 5;
 
-  const fetchMyOrder = async () => {
-    await fetch(
-      `${API_URL}/orders`
-    ).then(async (res) => {
-      let response = await res.json();
-      setorderData(response);
-    });
-  };
+export function MyOrder() {
+  const [orders, setOrders] = useState(null);
 
   useEffect(() => {
-    fetchMyOrder();
+    apiFetch('/orders')
+      .then((res) => res.json())
+      .then(setOrders)
+      .catch(() => setOrders([]));
   }, []);
 
-  const chunkArray = (arr, size) => {
-    return Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
-      arr.slice(i * size, i * size + size)
-    );
-  };
+  const chunkArray = (arr, size) =>
+    Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
 
-  const getStatusColor = (status) => {
-    const colors = {
-      pending: '#fcd34d',
-      shipped: '#60a5fa',
-      delivered: '#4ade80',
-      cancelled: '#fca5a1',
-      refunded: '#fcd34d'
-    };
-    return colors[status] || '#6b7280';
-  };
-
-  const updateOrderStatus = async (orderId, newStatus) => {
-    try {
-      const response = await fetch(`${API_URL}/order/${orderId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: newStatus })
-      });
-
-      if (response.ok) {
-        setorderData(prevData => {
-          const updatedData = Array.isArray(prevData) ? [...prevData] : { ...prevData };
-          const orderToUpdate = Array.isArray(updatedData) 
-            ? updatedData.find(order => order._id === orderId)
-            : updatedData;
-          
-          if (orderToUpdate) {
-            orderToUpdate.status = newStatus;
-          }
-          return updatedData;
-        });
-      } else {
-        console.error('Failed to update order status');
-      }
-    } catch (error) {
-      console.error('Error updating order status:', error);
+  const updateOrderStatus = async (orderId, status) => {
+    const response = await apiFetch(`/orders/${orderId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    });
+    if (response.ok) {
+      const updated = await response.json();
+      setOrders((prev) => prev.map((o) => (o._id === orderId ? updated : o)));
+    } else {
+      alert('Failed to update order status');
     }
   };
 
-  const renderOrderTable = (orders) => (
+  // One block per order: a summary row, then one row per item
+  const renderOrderTable = (chunk) => (
     <table className="product-table">
       <thead>
         <tr>
           <th>Date</th>
           <th>Phone Number</th>
           <th>Email</th>
-          <th>UID</th>
+          <th>Order ID</th>
           <th>Item</th>
           <th>Amount</th>
           <th>Price</th>
@@ -81,50 +48,53 @@ export function MyOrder() {
         </tr>
       </thead>
       <tbody>
-        {orders.map((item) =>
-          item.order_data.map((arrayData) =>
-            arrayData.map((order) => (
-              <tr key={order.item?.name || order.Order_date}>
-                <td>{order.Order_date || ""}</td>
-                <td>{order.Order_date && item.phoneNumber ? item.phoneNumber : ""}</td>
-                <td>{order.Order_date && item.email || ""}</td>
-                <td>{order.Order_date && item?._id || ""}</td>
-                <td>{order.item?.name || ""}</td>
-                <td>{order.amount || ""}</td>
-                <td>{order.item?.price ? `Rs ${order.item.price}/-` : ""}</td>
-                <td>{order.item?.price ? `Rs ${(order.item.price)*order.amount}/-` : ""}</td>
-                <td>{order.Order_date && (
-                  <select 
-                    className="order-status-dropdown"
-                    value={item.status || 'pending'}
-                    onChange={(e) => updateOrderStatus(item._id, e.target.value)}
-                    style={{ backgroundColor: getStatusColor(item.status || 'pending') }}
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="shipped">Shipped</option>
-                    <option value="delivered">Delivered</option>
-                    <option value="cancelled">Cancelled</option>
-                    <option value="refunded">Refunded</option>
-                  </select>
-                  )}
-                </td>
+        {chunk.map((order) => (
+          <React.Fragment key={order._id}>
+            <tr>
+              <td>{new Date(order.createdAt).toLocaleString()}</td>
+              <td>{order.phoneNumber}</td>
+              <td>{order.email}</td>
+              <td>{order._id.slice(-8)}</td>
+              <td colSpan={3}>{order.address}</td>
+              <td><strong>{money(order.total)}</strong></td>
+              <td>
+                <select
+                  className="order-status-dropdown"
+                  value={order.status}
+                  onChange={(e) => updateOrderStatus(order._id, e.target.value)}
+                  style={{ backgroundColor: STATUS_COLORS[order.status] }}
+                >
+                  {ORDER_STATUSES.map((s) => (
+                    <option key={s} value={s}>{s[0].toUpperCase() + s.slice(1)}</option>
+                  ))}
+                </select>
+              </td>
+            </tr>
+            {order.items.map((item, i) => (
+              <tr key={`${order._id}-${i}`}>
+                <td colSpan={4}></td>
+                <td>{item.name}</td>
+                <td>{item.amount}</td>
+                <td>{money(item.price)}</td>
+                <td>{money(item.price * item.amount)}</td>
+                <td></td>
               </tr>
-            ))
-          )
-        )}
+            ))}
+          </React.Fragment>
+        ))}
       </tbody>
     </table>
   );
 
+  if (orders === null) return <div className="order-container">Loading orders...</div>;
+
   return (
     <div>
       <div className="order-container">
-        {Object.keys(orderData).length !== 0 ? (
-          <Carousel>
-            {chunkArray(Array.isArray(orderData) ? orderData : [orderData], 5).map((chunk, index) => (
-              <div key={index}>
-                {renderOrderTable(chunk)}
-              </div>
+        {orders.length ? (
+          <Carousel showThumbs={false}>
+            {chunkArray(orders, ORDERS_PER_SLIDE).map((chunk, index) => (
+              <div key={index}>{renderOrderTable(chunk)}</div>
             ))}
           </Carousel>
         ) : (

@@ -1,19 +1,10 @@
-import { API_URL } from "../config";
+import { apiFetch } from "../config";
 import React, { useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faTag,
-  faDollarSign,
-  faList,
-  faBuilding,
-} from "@fortawesome/free-solid-svg-icons";
-import { useProductsContext } from "../hooks/useProductsContext";
 import { FaImage } from "react-icons/fa6";
 
 export const ProductForm = ({ initialData, onSubmit, submitButtonText }) => {
   const [photo, setPhoto] = useState(null);
   const [formData, setFormData] = useState(initialData);
-  const { dispatch } = useProductsContext();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -28,10 +19,16 @@ export const ProductForm = ({ initialData, onSubmit, submitButtonText }) => {
     e.preventDefault();
     const data = new FormData();
     Object.keys(formData).forEach(key => {
+      // Only send the image when a new file was picked
+      if (key === "image" && !(formData.image instanceof File)) return;
       data.append(key, formData[key]);
     });
 
-    await onSubmit(data);
+    const ok = await onSubmit(data);
+    if (ok) {
+      setFormData(initialData);
+      setPhoto(null);
+    }
   };
 
   return (
@@ -104,14 +101,17 @@ export const Home = () => {
   };
 
   const handleSubmit = async (data) => {
-    const response = await fetch(`${API_URL}/add`, {
+    const response = await apiFetch(`/add`, {
       method: "POST",
       body: data,
     });
-
+    const result = await response.json().catch(() => ({}));
     if (response.ok) {
       alert("Product added successfully!");
+      return true;
     }
+    alert(result.message || "Could not add the product");
+    return false;
   };
 
   return <ProductForm initialData={initialData} onSubmit={handleSubmit} submitButtonText="PUBLISH" />;

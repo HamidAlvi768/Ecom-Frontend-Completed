@@ -1,38 +1,31 @@
-import { API_URL } from "../config";
+import { apiFetch } from "../config";
 import React, { useEffect, useState } from 'react'
 import { Outlet, Navigate } from 'react-router-dom'
-import { Signup } from './Signup';
+
+// Dashboard pages need a logged-in admin. Checks the saved token with the backend.
 export const PrivateComponent = () => {
   const [error, setError] = useState(null);
-
-  const fetchProducts = async () => {
-    try {
-      const response = await fetch(`${API_URL}/products`, {
-        headers: {
-          authorization: `bearer ${JSON.parse(localStorage.getItem('token'))}`
-        }
-      });
-      if (response.status === 401) {
-        localStorage.removeItem('token');
-        setError('Token expired please login again');
-      }
-    } catch (error) {
-      console.error('Error fetching products:', error);
-      setError('An error occurred while fetching products');
-    }
-  }
-
   const auth = localStorage.getItem('token');
 
   useEffect(() => {
-    if (auth) {
-      fetchProducts();
-    }
+    if (!auth) return;
+    // apiFetch sends the user to /login on 401/403
+    apiFetch('/me')
+      .then((res) => res.json())
+      .then(({ user }) => {
+        if (user?.role !== 'admin') {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+        }
+      })
+      .catch((err) => {
+        if (err.message !== 'Not authorized') setError('Cannot reach the server. Is the backend running?');
+      });
   }, [auth]);
 
   if (error) {
-    return <div>{error}</div>;
+    return <div style={{ padding: 40, textAlign: 'center' }}>{error}</div>;
   }
 
-  return auth ? <Outlet /> : <Navigate to='/signup' />
+  return auth ? <Outlet /> : <Navigate to='/login' />
 }

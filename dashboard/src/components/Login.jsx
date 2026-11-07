@@ -1,6 +1,6 @@
 import { API_URL } from "../config";
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export const Login = () => {
   const [email, setEmail] = useState("");
@@ -23,11 +23,12 @@ export const Login = () => {
     });
 
     result = await result.json();
-    if (result.auth) {
-        // navigate to home page
+    if (result.auth && result.user?.role === "admin") {
         localStorage.setItem("user", JSON.stringify(result.user));
         localStorage.setItem("token", JSON.stringify(result.auth));
-        navigate('/');
+        navigate('/dashboard');
+      } else if (result.auth) {
+        alert("This account is not an admin. Only admin accounts can use the dashboard.");
       } else {
         alert(result.result || "Login failed");
       }
@@ -60,8 +61,7 @@ export const Login = () => {
                 {!password && <i>Password</i>}
               </div>
               <div className="links">
-                <Link to="/signup">Forgot Password</Link>
-                <Link to="/signup">Signup</Link>
+                <span>Admin accounts only</span>
               </div>
               <div className="inputBox">
                 <input type="submit" value="Login" />

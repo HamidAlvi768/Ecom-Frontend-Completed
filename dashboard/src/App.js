@@ -8,33 +8,29 @@ import {ProductList} from './components/ProductList';
 import {UpdateProduct} from './components/UpdateProduct';
 import {Dashboard} from './components/Dashboard';
 import {Login} from './components/Login';
-import {Signup} from './components/Signup';
-import { ProductsContextProvider } from './context/ProductsContext';
 import { PrivateComponent } from './components/PrivateComponent';
 import {MyOrder} from './components/Orders';
-// import OrdersTable from './components/Orders';
 
-
+// Admin accounts only. There is no signup here: customers sign up in the store,
+// and an account is made an admin with `npm run make-admin -- <email>` in the backend.
 function App() {
   return (
-    <ProductsContextProvider>
     <Router>
       <div className="App">
         <Navbar />
         <Routes>
           <Route element={<PrivateComponent />} >
-          <Route path="/" element={<Home />} />
-          <Route path="/product" element={<ProductList />} />
-          <Route path="/update-product/:id" element={<UpdateProduct />} />
-          <Route path="/orders" element={<MyOrder />} />
-          <Route path="/dashboard" element={<Dashboard />}/>
+            <Route path="/" element={<Home />} />
+            <Route path="/product" element={<ProductList />} />
+            <Route path="/update-product/:id" element={<UpdateProduct />} />
+            <Route path="/orders" element={<MyOrder />} />
+            <Route path="/dashboard" element={<Dashboard />}/>
           </Route>
           <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
+          <Route path="*" element={<Login />} />
         </Routes>
       </div>
     </Router>
-    </ProductsContextProvider>
   );
 }
 

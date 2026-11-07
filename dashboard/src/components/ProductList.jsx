@@ -1,4 +1,4 @@
-import { API_URL } from "../config";
+import { API_URL, apiFetch, assetUrl } from "../config";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -6,52 +6,42 @@ export const ProductList = () => {
   const [products, setProducts] = useState([]);
 
   const fetchProducts = async () => {
-    const response = await fetch(`${API_URL}/products`,{
-      headers: {
-        authorization: `bearer ${JSON.parse(localStorage.getItem('token'))}`
-      }
-    });
-    const data = await response.json();
-    setProducts(data);
-    if (response.status === 401) {
-      // setExpired(true);
-    localStorage.removeItem('token');
-          // navigate('/login'); // Redirect to login page
-          throw new Error('Token expired');
-        }
-
+    try {
+      const response = await fetch(`${API_URL}/products`);
+      const data = await response.json();
+      setProducts(Array.isArray(data) ? data : []);
+    } catch {
+      setProducts([]);
+    }
   };
-  useEffect(() => {
 
+  useEffect(() => {
     fetchProducts();
   }, []);
 
-  const deleteProduct = async (id) => {
-    await fetch(`${API_URL}/products/delete/${id}`, {
-      method: 'DELETE',
-    });
+  const deleteProduct = async (product) => {
+    if (!window.confirm(`Delete "${product.name}"? This cannot be undone.`)) return;
+    const response = await apiFetch(`/products/delete/${product._id}`, { method: 'DELETE' });
+    if (!response.ok) alert('Could not delete the product');
     fetchProducts();
   };
 
   const searchProduct = async (e) => {
-    let search = e.target.value;
-    if(search){
-
-      let result = await fetch(`${API_URL}/search/${search}`);
-      result = await result.json();
-      setProducts(result);
-    }
-    if (search === '') {
+    const search = e.target.value.trim();
+    if (!search) {
       fetchProducts();
+      return;
     }
+    const result = await fetch(`${API_URL}/search/${encodeURIComponent(search)}`);
+    setProducts(await result.json());
   };
 
   return (
     <div className="product-list">
       <h1 className="page-heading">Product List</h1>
-      <input onChange={searchProduct} type="text" />
+      <input onChange={searchProduct} type="text" placeholder="Search products..." />
       <div className="table-container">
-        {products.length > 0 ? 
+        {products.length > 0 ?
       <table className="product-table">
         <thead>
           <tr>
@@ -68,7 +58,7 @@ export const ProductList = () => {
             <tr key={product._id}>
               <td>
                 <img
-                  src={product.image}
+                  src={assetUrl(product.image)}
                   alt={product.name}
                   className="product-image"
                 />
@@ -80,7 +70,7 @@ export const ProductList = () => {
 
               <td>
                 <Link to={`/update-product/${product._id}`}>Update</Link>
-                <button onClick={() => deleteProduct(product._id)}>Delete</button>
+                <button onClick={() => deleteProduct(product)}>Delete</button>
               </td>
             </tr>
           ))}
