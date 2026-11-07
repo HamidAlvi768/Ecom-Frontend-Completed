@@ -1,3 +1,4 @@
+import { API_URL } from "../config";
 import React, { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { MoreHorizontal, RefreshCw, ShoppingCart, Users, Package, Star, DollarSign } from 'lucide-react';
@@ -10,15 +11,15 @@ export const Dashboard = () => {
 
   const fetchData = async () => {
     try {
-      const ordersResponse = await fetch('https://merry-moxie-6d2ca1.netlify.app/.netlify/functions/api/orders');
+      const ordersResponse = await fetch(`${API_URL}/orders`);
       const ordersData = await ordersResponse.json();
       setOrders(ordersData);
 
-      const usersResponse = await fetch('https://merry-moxie-6d2ca1.netlify.app/.netlify/functions/api/users');
+      const usersResponse = await fetch(`${API_URL}/users`);
       const usersData = await usersResponse.json();
       setUsers(usersData);
 
-      const productsResponse = await fetch('https://merry-moxie-6d2ca1.netlify.app/.netlify/functions/api/products', {
+      const productsResponse = await fetch(`${API_URL}/products`, {
         headers: {
           authorization: `bearer ${JSON.parse(localStorage.getItem('token'))}`
         }
@@ -35,7 +36,7 @@ export const Dashboard = () => {
   }, []);
 
   const deleteOrder = async (id) => {
-    await fetch(`https://merry-moxie-6d2ca1.netlify.app/.netlify/functions/api/order/${id}`, {
+    await fetch(`${API_URL}/order/${id}`, {
       method: 'DELETE',
     });
     fetchData();
@@ -43,7 +44,7 @@ export const Dashboard = () => {
 
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
-      const response = await fetch(`https://merry-moxie-6d2ca1.netlify.app/.netlify/functions/api/order/${orderId}`, {
+      const response = await fetch(`${API_URL}/order/${orderId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

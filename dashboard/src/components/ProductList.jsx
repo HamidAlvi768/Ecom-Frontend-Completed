@@ -1,3 +1,4 @@
+import { API_URL } from "../config";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -5,7 +6,7 @@ export const ProductList = () => {
   const [products, setProducts] = useState([]);
 
   const fetchProducts = async () => {
-    const response = await fetch("https://merry-moxie-6d2ca1.netlify.app/.netlify/functions/api/products",{
+    const response = await fetch(`${API_URL}/products`,{
       headers: {
         authorization: `bearer ${JSON.parse(localStorage.getItem('token'))}`
       }
@@ -26,7 +27,7 @@ export const ProductList = () => {
   }, []);
 
   const deleteProduct = async (id) => {
-    await fetch(`https://merry-moxie-6d2ca1.netlify.app/.netlify/functions/api/products/delete/${id}`, {
+    await fetch(`${API_URL}/products/delete/${id}`, {
       method: 'DELETE',
     });
     fetchProducts();
@@ -36,7 +37,7 @@ export const ProductList = () => {
     let search = e.target.value;
     if(search){
 
-      let result = await fetch(`https://merry-moxie-6d2ca1.netlify.app/.netlify/functions/api/search/${search}`);
+      let result = await fetch(`${API_URL}/search/${search}`);
       result = await result.json();
       setProducts(result);
     }

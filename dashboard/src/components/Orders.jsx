@@ -1,3 +1,4 @@
+import { API_URL } from "../config";
 import React, { useEffect, useState } from "react";
 import { Carousel } from 'react-responsive-carousel';
 
@@ -6,7 +7,7 @@ export function MyOrder() {
 
   const fetchMyOrder = async () => {
     await fetch(
-      "https://merry-moxie-6d2ca1.netlify.app/.netlify/functions/api/orders"
+      `${API_URL}/orders`
     ).then(async (res) => {
       let response = await res.json();
       setorderData(response);
@@ -36,7 +37,7 @@ export function MyOrder() {
 
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
-      const response = await fetch(`https://merry-moxie-6d2ca1.netlify.app/.netlify/functions/api/order/${orderId}`, {
+      const response = await fetch(`${API_URL}/order/${orderId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

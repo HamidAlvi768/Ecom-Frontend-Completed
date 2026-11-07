@@ -1,3 +1,4 @@
+import { API_URL } from "../config";
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Login } from './Login';
@@ -12,7 +13,7 @@ export const Signup = () => {
   const handleSignup = async (e) => {
     e.preventDefault();
     // Add your signup logic here, e.g., making an API request to create a new user.
-    let result = await fetch('https://merry-moxie-6d2ca1.netlify.app/.netlify/functions/api/signup', {
+    let result = await fetch(`${API_URL}/signup`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -26,12 +27,14 @@ export const Signup = () => {
     
     result = await result.json();
 
-    if (result) {
+    if (result.auth) {
       // Set user data only if successful signup
       // setUser(result);
-      localStorage.setItem("user", JSON.stringify(result));
+      localStorage.setItem("user", JSON.stringify(result.result));
       localStorage.setItem("token", JSON.stringify(result.auth));
       navigate('/');
+    } else {
+      alert(result.message || "Signup failed");
     }
     // Handle the result here (e.g., store token, redirect user, show error)
   };

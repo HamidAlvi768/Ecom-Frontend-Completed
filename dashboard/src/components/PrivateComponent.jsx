@@ -1,3 +1,4 @@
+import { API_URL } from "../config";
 import React, { useEffect, useState } from 'react'
 import { Outlet, Navigate } from 'react-router-dom'
 import { Signup } from './Signup';
@@ -6,7 +7,7 @@ export const PrivateComponent = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch("https://merry-moxie-6d2ca1.netlify.app/.netlify/functions/api/products", {
+      const response = await fetch(`${API_URL}/products`, {
         headers: {
           authorization: `bearer ${JSON.parse(localStorage.getItem('token'))}`
         }

@@ -1,3 +1,4 @@
+import { API_URL } from "../config";
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -103,7 +104,7 @@ export const Home = () => {
   };
 
   const handleSubmit = async (data) => {
-    const response = await fetch("https://merry-moxie-6d2ca1.netlify.app/.netlify/functions/api/add", {
+    const response = await fetch(`${API_URL}/add`, {
       method: "POST",
       body: data,
     });

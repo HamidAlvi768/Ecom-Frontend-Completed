@@ -1,3 +1,4 @@
+import { API_URL } from "../config";
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -26,7 +27,7 @@ export const UpdateProduct = () => {
     // Fetch logic here
     // This is a placeholder. Replace with actual API call
     const response = await fetch(
-      `https://merry-moxie-6d2ca1.netlify.app/.netlify/functions/api/products/${id}`,
+      `${API_URL}/products/${id}`,
       {
         headers: {
           authorization: `bearer ${JSON.parse(localStorage.getItem("token"))}`,
@@ -76,7 +77,7 @@ export const UpdateProduct = () => {
 
     // Update logic here
     const response = await fetch(
-      `https://merry-moxie-6d2ca1.netlify.app/.netlify/functions/api/products/update/${id}`,
+      `${API_URL}/products/update/${id}`,
       {
         method: "PUT",
         body: data,
